@@ -62,25 +62,35 @@ Theta2_grad = zeros(size(Theta2));
 %               and Theta2_grad from Part 2.
 %
 
+% Forward propagate the network
+a_1 = [ones(m, 1) X];
+z_2 = a_1 * Theta1';
+a_2 = [ones(m, 1) sigmoid(z_2)];
+z_3 = a_2 * Theta2';
+a_3 = sigmoid(z_3);
 
+% One-hot encode the output labels
+y = (y == 1:num_labels);
 
+% Compute loss function and regularization costs
+J1 = -sum(y .* log(a_3) + (1 - y) .* log(1 - a_3), 'all');
+J2 = (sum(Theta1(:, 2:end) .^ 2, 'all') + sum(Theta2(:, 2:end) .^2, 'all')) * lambda / 2;
+J = (J1 + J2) / m;
 
+% Compute delta terms
+d_3 = a_3 - y;
+d_2 = d_3 * Theta2;
+d_2 = d_2(:, 2:end) .* sigmoidGradient(z_2);
 
+% Compute gradients
+Theta2_grad = d_3' * a_2 / m;
+Theta1_grad = d_2' * a_1 / m;
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-% -------------------------------------------------------------
+% Add regularization to gradients
+Theta2_grad = Theta2_grad + Theta2 * lambda / m;
+Theta2_grad(:, 1) = Theta2_grad(:, 1) - Theta2(:, 1) * lambda / m;
+Theta1_grad = Theta1_grad + Theta1 * lambda / m;
+Theta1_grad(:, 1) = Theta1_grad(:, 1) - Theta1(:, 1) * lambda / m;
 
 % =========================================================================
 

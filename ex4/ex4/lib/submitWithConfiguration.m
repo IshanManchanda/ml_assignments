@@ -71,14 +71,18 @@ function response = getResponse(url, body)
   % NEW CURL SUBMISSION FOR WINDOWS AND MAC
   if ispc
     new_body = regexprep (body, '\"', '\\"'); % will escape double quoted objects to format properly for windows libcurl
-    json_command = sprintf('curl -X POST -H "Cache-Control: no-cache" -H "Content-Type: application/json" -d "%s" "%s"', new_body, url);
+    json_command = sprintf('curl -X POST -H "Cache-Control: no-cache" -H "Content-Type: application/json" -d "%s" --ssl-no-revoke "%s"', new_body, url);
     [code, response] = dos(json_command); %dos is for windows
+
+    new_response = regexp(response, '\{(.)*', 'match');
+    response = new_response{1,1};
+
     % test the success code
     if (code ~= 0)
       fprintf('[error] submission with Invoke-WebRequest() was not successful\n');
     end
   else
-    json_command = sprintf('curl -X POST -H "Cache-Control: no-cache" -H "Content-Type: application/json" -d '' %s '' ''%s''', body, url);
+    json_command = sprintf('curl -X POST -H "Cache-Control: no-cache" -H "Content-Type: application/json" -d '' %s '' --ssl-no-revoke ''%s''', body, url);
     [code, response] = system(json_command);
     % test the success code
     if (code ~= 0)
